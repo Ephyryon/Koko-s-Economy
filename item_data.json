@@ -24,6 +24,11 @@
             "dur": 10,
             "Price": 250,
             "desc": "**A large battery used in cars.**"
+        },
+        "medkit": {
+            "dur": 1,
+            "Price": 10000,
+            "desc": "**A small package with everything you need to heal any wound.**"
         }
     }
 }

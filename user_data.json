@@ -1,14 +1,15 @@
 {
     "751792938433904671": {
-        "Cash": 3105,
-        "Bank": 8979,
+        "Cash": 1105,
+        "Bank": 979,
         "Health": 100,
         "Stamina": 5,
-        "Job": "unemployed",
+        "Job": "Koko The Economist",
         "Inv": {
             "tools": {
                 "shovel": 8,
-                "car battery": 10
+                "car battery": 10,
+                "medkit": 10
             },
             "burger": 114,
             "apple": 127
@@ -16,12 +17,21 @@
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
         "Shifts-Worked": 15,
-        "Roles": []
+        "Roles": [],
+        "Crime Score": 0,
+        "Bail": 0,
+        "Characters": {
+            "Doctor": {
+                "Progress": 0,
+                "Relation": 0
+            },
+            "Dave": 0
+        }
     },
     "720629242731429988": {
-        "Cash": 570,
+        "Cash": 720,
         "Bank": 0,
-        "Health": 32,
+        "Health": 100,
         "Stamina": 70,
         "Job": "Dani The Blackmailer",
         "Inv": {
@@ -29,8 +39,17 @@
         },
         "Key": "cardboard",
         "Key-Fail": 0,
-        "Shifts-Worked": 8,
-        "Roles": []
+        "Shifts-Worked": 12,
+        "Roles": [],
+        "Crime Score": 9,
+        "Bail": 0,
+        "NPC": {
+            "Doctor": {
+                "Progress": 0,
+                "Relation": 0
+            },
+            "Dave": 0
+        }
     },
     "1305521783016783875": {
         "Cash": 100,
@@ -47,7 +66,16 @@
         "Key": "e",
         "Key-Fail": 0,
         "Shifts-Worked": 10,
-        "Roles": []
+        "Roles": [],
+        "Crime Score": 2,
+        "Bail": 0,
+        "NPC": {
+            "Doctor": {
+                "Progress": 0,
+                "Relation": 0
+            },
+            "Dave": 0
+        }
     },
     "1306569822863228959": {
         "Cash": 0,
@@ -61,11 +89,20 @@
         "Key": "f",
         "Key-Fail": 0,
         "Shifts-Worked": 0,
-        "Roles": []
+        "Roles": [],
+        "Crime Score": 0,
+        "Bail": 0,
+        "NPC": {
+            "Doctor": {
+                "Progress": 0,
+                "Relation": 0
+            },
+            "Dave": 0
+        }
     },
     "656219059322617916": {
         "Cash": 243,
-        "Health": 100,
+        "Health": 95,
         "Stamina": 100,
         "Job": "unemployed",
         "Inv": {
@@ -74,6 +111,15 @@
         "Key": "color_key",
         "Key-Fail": 0,
         "Shifts-Worked": 0,
-        "Roles": []
+        "Roles": [],
+        "Crime Score": 0,
+        "Bail": 0,
+        "NPC": {
+            "Doctor": {
+                "Progress": 0,
+                "Relation": 0
+            },
+            "Dave": 0
+        }
     }
 }
