@@ -1,0 +1,29 @@
+{
+    "apple": {
+        "Stamina": 10,
+        "Price": 5,
+        "desc": "**A fruit. It is crunchy, but soft nontheless.**"
+    },
+    "burger": {
+        "Stamina": 25,
+        "Price": 15,
+        "desc": "**A layered meal made commonly of a grounded beef patty between two loaves of bread.**"
+    },
+    "plastic straw": {
+        "Stamina": 0,
+        "Price": 100000,
+        "desc": "**Feed it to the turtles!**"
+    },
+    "tools": {
+        "shovel": {
+            "dur": 10,
+            "Price": 150,
+            "desc": "**A stick with a metal plate welded to one end. The plate is slightly indented making it decent for picking up loose materials.**"
+        },
+        "car battery": {
+            "dur": 10,
+            "Price": 250,
+            "desc": "**A large battery used in cars.**"
+        }
+    }
+}

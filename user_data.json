@@ -1,0 +1,79 @@
+{
+    "751792938433904671": {
+        "Cash": 3105,
+        "Bank": 8979,
+        "Health": 100,
+        "Stamina": 5,
+        "Job": "unemployed",
+        "Inv": {
+            "tools": {
+                "shovel": 8,
+                "car battery": 10
+            },
+            "burger": 114,
+            "apple": 127
+        },
+        "Key": "Sjokolade42!",
+        "Key-Fail": 0,
+        "Shifts-Worked": 15,
+        "Roles": []
+    },
+    "720629242731429988": {
+        "Cash": 570,
+        "Bank": 0,
+        "Health": 32,
+        "Stamina": 70,
+        "Job": "Dani The Blackmailer",
+        "Inv": {
+            "tools": {}
+        },
+        "Key": "cardboard",
+        "Key-Fail": 0,
+        "Shifts-Worked": 8,
+        "Roles": []
+    },
+    "1305521783016783875": {
+        "Cash": 100,
+        "Bank": 0,
+        "Health": 101,
+        "Stamina": 100,
+        "Job": "beggar",
+        "Inv": {
+            "tools": {
+                "car battery": 10
+            },
+            "burger": 10
+        },
+        "Key": "e",
+        "Key-Fail": 0,
+        "Shifts-Worked": 10,
+        "Roles": []
+    },
+    "1306569822863228959": {
+        "Cash": 0,
+        "Bank": 6636,
+        "Health": 100,
+        "Stamina": 100,
+        "Job": "unemployed",
+        "Inv": {
+            "tools": {}
+        },
+        "Key": "f",
+        "Key-Fail": 0,
+        "Shifts-Worked": 0,
+        "Roles": []
+    },
+    "656219059322617916": {
+        "Cash": 243,
+        "Health": 100,
+        "Stamina": 100,
+        "Job": "unemployed",
+        "Inv": {
+            "tools": {}
+        },
+        "Key": "color_key",
+        "Key-Fail": 0,
+        "Shifts-Worked": 0,
+        "Roles": []
+    }
+}
