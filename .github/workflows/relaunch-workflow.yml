@@ -25,12 +25,18 @@ jobs:
       - name: Check for "Shutting down..." in Main Workflow logs
         id: check_logs
         run: |
-          gh run view $(gh run list --workflow="Main Workflow" --json databaseId --jq '.[0].databaseId') --log | grep "Shutting down..." || echo "No shutdown message found"
+          LOG_OUTPUT=$(gh run view $(gh run list --workflow="Main Workflow" --json databaseId --jq '.[0].databaseId') --log)
+          echo "$LOG_OUTPUT"
+          if echo "$LOG_OUTPUT" | grep -q "Shutting down..."; then
+            echo "shutdown_found=true" >> $GITHUB_ENV
+          else
+            echo "shutdown_found=false" >> $GITHUB_ENV
+          fi
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
       - name: Trigger Main Workflow
-        if: steps.check_logs.outputs.result != 'Shutting down...'
+        if: env.shutdown_found == 'false'
         run: |
           gh workflow run "Main Workflow"
         env:
