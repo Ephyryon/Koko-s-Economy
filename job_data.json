@@ -1,15 +1,57 @@
 {
-    "Construction worker": {
-        "Pay": 150,
+    "construction worker": {
+        "Pay": 200,
         "Stam": 40,
         "Shift-Req": 25,
+        "Work-Cooldown": 2600
+    },
+    "demolitionist": {
+        "Pay": 350,
+        "Stam": 75,
+        "Shift-Req": 50,
+        "Work-Cooldown": 3000
+    },
+    "priest": {
+        "Pay": 500,
+        "Stam": 50,
+        "Shift-Req": 100,
         "Work-Cooldown": 3600
+    },
+    "cult leader": {
+        "Pay": 1000,
+        "Stam": 75,
+        "Shift-Req": 250,
+        "Work-Cooldown": 3600
+    },
+    "voice": {
+        "Pay": 1500,
+        "Stam": 100,
+        "Shift-Req": 500,
+        "Work-Cooldown": 1800
     },
     "cashier": {
         "Pay": 100,
         "Stam": 30,
         "Shift-Req": 10,
-        "Work-Cooldown": 3000
+        "Work-Cooldown": 2200
+    },
+    "tea tester": {
+        "Pay": 150,
+        "Stam": 25,
+        "Shift-Req": 15,
+        "Work-Cooldown": 2400
+    },
+    "paper maker": {
+        "Pay": 125,
+        "Stam": 75,
+        "Shift-Req": 25,
+        "Work-Cooldown": 1800
+    },
+    "artist": {
+        "Pay": 150,
+        "Stam": 10,
+        "Shift-Req": 30,
+        "Work-Cooldown": 2000
     },
     "tax Advisor": {
         "Pay": 1000,
@@ -27,13 +69,13 @@
         "Pay": 10,
         "Stam": 0,
         "Shift-Req": 0,
-        "Work-Cooldown": 120
+        "Work-Cooldown": 1200
     },
     "beggar": {
         "Pay": 25,
         "Stam": 50,
         "Shift-Req": 5,
-        "Work-Cooldown": 2000
+        "Work-Cooldown": 1800
     },
     "Dani The Blackmailer": {
         "Pay": 150,
