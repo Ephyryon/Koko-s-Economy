@@ -145,7 +145,7 @@ class MySelect(Select):
             view = MemberView(members_with_role, hospital_callback)
             await interaction.response.send_message("Who do you want to visit?", view=view, ephemeral=True)
         elif self.values[0] == "T":
-            view = Doctor()
+            view = Doctor(interaction)
             await interaction.response.send_message(f'"Hello there. Did you need anything?"', view=view, ephemeral=True)
         user_dump()
 
@@ -155,10 +155,13 @@ class MyOptions(View):
         self.add_item(MySelect())
 
 class NPC(Select):
-    def __init__(self):
+    def __init__(self, inter: discord.Interaction):
+        quest = "Have anything you need help with?"
+        if user_data[str(inter.user.id)]['Characters']['Doctor']['Progress'] == 1:
+            quest = "Heres the five burgers you wanted."
         options = [
             discord.SelectOption(label="How are you doing today?", value="H"),
-            discord.SelectOption(label="Have anything you need help with?", value="A"),
+            discord.SelectOption(label=quest, value="A"),
             discord.SelectOption(label="Nevermind, forgot what it was about.", value="N")
         ]
         super().__init__(placeholder="Speak...", min_values=1, max_values=1, options=options)
@@ -172,11 +175,27 @@ class NPC(Select):
             elif relation > 15:
                 smile = ":grin:"
             await interaction.response.send_message(f"I'm doing quite well, thank you for asking. {smile}", ephemeral=True)
-            relation += 1
+            user_data[str(interaction.user.id)]['Characters']['Doctor']['Relation'] += 1
+            user_dump()
         elif self.values[0] == "A":
-            if (relation > 5) and (progress == 0):
-                await interaction.response.send_message(f"Actually I do! Could you get me five burgers? Working all day makes one quite hungry.", ephemeral=True)
-                progress += 1
+            if (relation > 5):
+                if progress == 0:
+                    await interaction.response.send_message(f"Actually I do! Could you get me five burgers? Working all day makes one quite hungry.", ephemeral=True)
+                    user_data[str(interaction.user.id)]['Characters']['Doctor']['Progress'] += 1
+                    user_dump()
+                elif (progress == 1):
+                    if user_data[str(interaction.user.id)]['Inv']['burger'] >= 5:
+                        await interaction.response.send_message(f"Thanks! You're a lifesaver. Here, I don't have any cash on me right now so this'll have to do. | +1 Medkit", ephemeral=True)
+                        if "medkit" in user_data[str(interaction.user.id)]['Inv']['tools']:
+                            user_data[str(interaction.user.id)]['Inv']['tools']['medkit'] += 10
+                        else:
+                            user_data[str(interaction.user.id)]['Inv']['tools']['medkit'] = 10
+                            user_data[str(interaction.user.id)]['Characters']['Doctor']['Progress'] += 1
+                        user_dump()
+                    else:
+                        await interaction.response.send_message("What? You don't have five burgers. :face_with_monocle:")
+                else:
+                    await interaction.response.send_message("No, I don't think so. Nice seeing you, but I've got to get back to work.", ephemeral=True)
             else:
                 await interaction.response.send_message("No, I don't think so. Oh well, I've got to get back to my work. Goodbye.", ephemeral=True)
         elif self.values[0] == "N":
@@ -184,9 +203,9 @@ class NPC(Select):
         user_dump()
 
 class Doctor(View):
-    def __init__(self):
+    def __init__(self, inter: discord.Interaction):
         super().__init__()
-        self.add_item(NPC())
+        self.add_item(NPC(inter))
 
 class finditems:
     def __init__(self, user_data, item_data):

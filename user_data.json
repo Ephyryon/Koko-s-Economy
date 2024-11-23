@@ -23,7 +23,7 @@
         "Characters": {
             "Doctor": {
                 "Progress": 0,
-                "Relation": 0
+                "Relation": 1
             },
             "Dave": 0
         }
