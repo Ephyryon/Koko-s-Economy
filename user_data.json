@@ -1,9 +1,9 @@
 {
     "751792938433904671": {
-        "Cash": 2605,
+        "Cash": 4105,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 15,
+        "Stamina": 100,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
@@ -11,12 +11,12 @@
                 "car battery": 10,
                 "medkit": 10
             },
-            "burger": 110,
+            "burger": 103,
             "apple": 127
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 16,
+        "Shifts-Worked": 17,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
@@ -26,7 +26,8 @@
                 "Relation": 1
             },
             "Dave": 0
-        }
+        },
+        "Job-Cooldown": 0
     },
     "720629242731429988": {
         "Cash": 720,
@@ -78,9 +79,9 @@
         }
     },
     "1306569822863228959": {
-        "Cash": 0,
+        "Cash": 10,
         "Bank": 6636,
-        "Health": 100,
+        "Health": 250,
         "Stamina": 100,
         "Job": "unemployed",
         "Inv": {
@@ -88,9 +89,9 @@
         },
         "Key": "f",
         "Key-Fail": 0,
-        "Shifts-Worked": 0,
+        "Shifts-Worked": 1,
         "Roles": [],
-        "Crime Score": 0,
+        "Crime Score": 1,
         "Bail": 0,
         "NPC": {
             "Doctor": {
@@ -98,7 +99,11 @@
                 "Relation": 0
             },
             "Dave": 0
-        }
+        },
+        "Jail-Time": 0,
+        "Heal-Time": -1,
+        "Job-Cooldown": 0,
+        "Rob-Cooldown": 0
     },
     "656219059322617916": {
         "Cash": 243,

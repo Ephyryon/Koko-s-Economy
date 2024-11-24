@@ -28,9 +28,11 @@ jobs:
       env:
         DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       run: python bot.py
+      timeout-minutes: 330
+      continue-on-error: True
 
     - name: Commit and Push Changes
-      if: success()
+      if: always()
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |

@@ -64,6 +64,16 @@ cooldowns = {}
 token = os.getenv('DISCORD_BOT_TOKEN')
 guild_id = 1301922025383661640
 ROLE_NAME = 1302039248286912532
+cards = ["Ace-of-Hearts", "Ace-of-Spades", "Ace-of-Diamonds", "Ace-of-Clovers", "King-of-Hearts", "King-of-Spades", "King-of-Diamonds", "King-of-Clovers", "Queen-of-Hearts", "Queen-of-Spades", "Queen-of-Diamonds", "Queen-of-Clovers", "Jack-of-Hearts", "Jack-of-Spades", "Jack-of-Diamonds", "Jack-of-Clovers", "Ten-of-Hearts", "Ten-of-Spades", "Ten-of-Diamonds", "Ten-of-Clovers", "Nine-of-Hearts", "Nine-of-Spades", "Nine-of-Diamonds", "Nine-of-Clovers", "Eight-of-Hearts", "Eight-of-Spades", "Eight-of-Diamonds", "Eight-of-Clovers", "Seven-of-Hearts", "Seven-of-Spades", "Seven-of-Diamonds", "Seven-of-Clovers", "Six-of-Hearts", "Six-of-Spades", "Six-of-Diamonds", "Six-of-Clovers", "Five-of-Hearts", "Five-of-Spades", "Five-of-Diamonds", "Five-of-Clovers", "Four-of-Hearts", "Four-of-Spades", "Four-of-Diamonds", "Four-of-Clovers", "Three-of-Hearts", "Three-of-Spades", "Three-of-Diamonds", "Three-of-Clovers", "Two-of-Hearts", "Two-of-Spades", "Two-of-Diamonds", "Two-of-Clovers"]
+
+def calculate_hand_value(hand, card_values):
+    value = sum(card_values[card.split('-')[0]] for card in hand)
+    # Adjust for Aces
+    num_aces = sum(1 for card in hand if card.startswith('Ace'))
+    while value > 21 and num_aces:
+        value -= 10
+        num_aces -= 1
+    return value
 
 class MyView(View):
     def __init__(self, add_hows_your_day: bool, add_bye: bool):
@@ -126,6 +136,7 @@ class MySelect(Select):
                     await selected_member.add_roles(*roles)
                     user_data[str(selected_member.id)]['Health'] = 250
                     user_data[str(selected_member.id)]['Roles'].clear()
+                    user_data[str(selected_member.id)]['Heal-Time'] = 0
                 else:
                     await inter.response.send_message(f"You don't have any medkits to heal {selected_member.nick} with... ", ephemeral=True)
         if self.values[0] == "V":
@@ -237,17 +248,54 @@ class finditems:
         with open('user_data.json', 'w') as file:
             json.dump(self.user_data, file, indent=4)
 
+class CardGame(discord.ui.View):
+    def __init__(self, player_hand, bot_hand, deck, card_value, blackjack: bool):
+        super().__init__()
+        self.player_hand = player_hand
+        self.bot_hand = bot_hand
+        self.deck = deck
+        self.card_value = card_value
+        self.player_value = calculate_hand_value(player_hand, card_value)
+        self.bot_value = calculate_hand_value(bot_hand, card_value)
+
+        if blackjack:
+            hit = Button(label="Hit", style=discord.ButtonStyle.primary)
+            stay = Button(label="Stay", style=discord.ButtonStyle.secondary)
+            hit.callback = self.hit
+            stay.callback = self.stay
+            self.add_item(hit)
+            self.add_item(stay)
+
+
+    async def hit(self, interaction: discord.Interaction):
+        self.player_hand.append(self.deck.pop())
+        self.player_value = calculate_hand_value(self.player_hand, self.card_value)
+        if self.player_value > 21:
+            await interaction.response.edit_message(content=f"Your hand: {self.player_hand} (value: {self.player_value})\nYou busted! Bot wins!", view=None)
+        else:
+            await interaction.response.edit_message(content=f"Your hand: {self.player_hand} (value: {self.player_value})\n\nBot's hand: {self.bot_hand[0]} and a hidden card.")
+
+    async def stay(self, interaction: discord.Interaction):
+        while self.bot_value < 17:
+            self.bot_hand.append(self.deck.pop())
+            self.bot_value = calculate_hand_value(self.bot_hand, self.card_value)
+        result = "It's a tie!" if self.player_value == self.bot_value else "You win!" if self.player_value > self.bot_value or self.bot_value > 21 else "Bot wins!"
+        await interaction.response.edit_message(content=f"Your hand: {self.player_hand} (value: {self.player_value})\nBot's hand: {self.bot_hand} (value: {self.bot_value})\n{result}", view=None)
+
 @bot.event
 async def on_ready():
     clear_channel.start()
     on_health_zero_task.start()
     print(f"Logged in as {bot.user}")
     print(f"GUILD_ID: {guild_id}")
+    guild = bot.get_guild(guild_id)
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s) globally.")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
+    status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members]
+    await asyncio.gather(*status_tasks)
 
 @tasks.loop(minutes=10)
 async def clear_channel():
@@ -272,8 +320,13 @@ async def check_health(member):
                 await member.remove_roles(*roles)
                 await member.add_roles(hospital_role)
                 await member.send(f"You have been hospitalized. Time: 50 minutes.")
-                await asyncio.sleep(3000)
-                if hospital_role in member.roles:
+                user_data[str(member.id)]['Heal-Time'] = 3000
+                while user_data[str(member.id)]['Heal-Time'] > 0:
+                    await asyncio.sleep(1)
+                    user_data[str(member.id)]['Heal-Time'] -= 1
+                    user_dump()
+                updated_user = await member.guild.fetch_member(member.id)
+                if hospital_role in updated_user.roles:
                     await member.remove_roles(hospital_role)
                     await member.add_roles(*roles)
                     user_data[str(member.id)]['Roles'].clear()
@@ -282,6 +335,51 @@ async def check_health(member):
                     user_dump()
                 else:
                     None
+
+async def user_status(member: discord.Member, status):
+    jail_role = discord.utils.get(member.guild.roles, id=1307363196448931850)
+    message = "You are no longer in jail."
+    if status == "Heal-Time":
+        jail_role = discord.utils.get(member.guild.roles, id=1308730447387164702)
+        message = "You are no longer hospitalized."
+    if str(member.id) in user_data:
+        role_ids = user_data[str(member.id)]['Roles']
+        roles = [member.guild.get_role(role_id) for role_id in role_ids if member.guild.get_role(role_id) is not None]
+        if jail_role in member.roles:
+            if status in user_data[str(member.id)]:
+                while user_data[str(member.id)][status] > 0:
+                    await asyncio.sleep(1)
+                    user_data[str(member.id)][status] -= 1
+                    user_dump()
+                updated_user = await member.guild.fetch_member(member.id)
+                if jail_role in updated_user.roles:
+                    await member.send(message)
+                    await member.remove_roles(jail_role)
+                    await member.add_roles(*roles)
+                    user_data[str(member.id)]['Roles'].clear()
+                    if status == "Jail-Time":
+                        user_data[str(member.id)]['Crime Score'] = 0
+                        user_data[str(member.id)]['Bail'] = 0
+                    elif status == "Heal-Time":
+                        user_data[str(member.id)]['Health'] = 150
+                    user_dump()
+            else:
+                await member.send(message)
+                await member.remove_roles(jail_role)
+                await member.add_roles(*roles)
+                user_data[str(member.id)]['Roles'].clear()
+                if status == "Jail-Time":
+                    user_data[str(member.id)]['Crime Score'] = 0
+                    user_data[str(member.id)]['Bail'] = 0
+                elif status == "Heal-Time":
+                    user_data[str(member.id)]['Health'] = 150
+                user_dump()
+        else:
+            if status in user_data[str(member.id)]:
+                while user_data[str(member.id)][status] > 0:
+                    await asyncio.sleep(1)
+                    user_data[str(member.id)][status] -= 1
+                    user_dump()
 
 @bot.event
 async def on_member_join(member):
@@ -304,24 +402,26 @@ async def job_work(interaction: discord.Interaction):
     if user_id in user_data:
         job_name = user_data[user_id]['Job']
         if user_data[user_id]['Stamina'] >= job_data[job_name]['Stam']:
-            current_time = time.time()
-            cooldown_time = job_data[job_name]['Work-Cooldown']
-            if user_id in cooldowns:
-                elapsed_time = current_time - cooldowns[user_id]
-                if elapsed_time < cooldown_time:
-                    remaining_time = cooldown_time - elapsed_time
-                    await interaction.response.send_message(f'{interaction.user.mention}, you need to wait {int(remaining_time)} seconds before using this command again.')
+            if "Job-Cooldown" in user_data[user_id]:
+                if user_data[user_id]['Job-Cooldown'] != 0:
+                    await interaction.response.send_message(f"You need to wait {user_data[user_id]['Job-Cooldown']} seconds to work again.", ephemeral=True)
                     return
-            cooldowns[user_id] = current_time
+                else:
+                    user_data[user_id]['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
+            else:
+                user_data[user_id]['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
             if job_name in job_data:
                 pay = job_data[job_name]['Pay']
                 stam = job_data[job_name]['Stam']
                 user_data[user_id]['Cash'] += pay
                 user_data[user_id]['Stamina'] -= stam
                 user_data[user_id]['Shifts-Worked'] += 1
-                with open('user_data.json', 'w') as file:
-                    json.dump(user_data, file, indent=4)
                 await interaction.response.send_message(f'{interaction.user.mention}, you worked as a {job_name} and earned {pay} cash! You now have {user_data[user_id]["Cash"]} cash.')
+                while user_data[user_id]['Job-Cooldown'] > 0:
+                    await asyncio.sleep(1)
+                    user_data[user_id]['Job-Cooldown'] -= 1
+                    user_dump()
+                user_dump()
             else:
                 await interaction.response.send_message(f'{interaction.user.mention}, your job details could not be found.')
         else:
@@ -815,15 +915,14 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
     if user_id in user_data:
         if rob_id in user_data:
             chance = random.randint(1, 6)
-            current_time = time.time()
-            cooldown_time = 600
-            if user_id in cooldowns:
-                elapsed_time = current_time - cooldowns[user_id]
-                if elapsed_time < cooldown_time:
-                    remaining_time = cooldown_time - elapsed_time
-                    await interaction.response.send_message(f'{interaction.user.mention}, you need to wait {int(remaining_time)} seconds before using this command again.')
+            if "Rob-Cooldown" in user_data[user_id]:
+                if user_data[user_id]['Rob-Cooldown'] > 0:
+                    await interaction.response.send_message(f"You need to wait {user_data[user_id]['Rob-Cooldown']} seconds to use this command again.")
                     return
-                cooldowns[user_id] = current_time
+                else:
+                    user_data[user_id]['Rob-Cooldown'] = 600
+            else:
+                user_data[user_id]['Rob-Cooldown'] = 600
             if chance == 1:
                 if user_data[rob_id]['Cash'] > 0:
                     amount = random.randint(1, user_data[rob_id]['Cash'])
@@ -831,6 +930,10 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     user_data[user_id]['Cash'] += amount
                     user_data[rob_id]['Cash'] -= amount
                     await member.send(f"{interaction.user} has robbed you for {amount} cash. You now have {user_data[rob_id]['Cash']} cash left.")
+                    while user_data[user_id]['Rob-Cooldown'] > 0:
+                        await asyncio.sleep(1)
+                        user_data[user_id]['Rob-Cooldown'] -= 1
+                        user_dump()
                 else:
                     await interaction.response.send_message(f"They were too poor to rob. Completely empty pockets. :pensive:", ephemeral=True)
             elif chance == 3:
@@ -839,13 +942,16 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     await interaction.response.send_message(f"You robbed {member.nick} for {amount} cash. You were stealthy enough so that {member.nick} didn't find out you robbed them.", ephemeral=True)
                     user_data[user_id]['Cash'] += amount
                     user_data[rob_id]['Cash'] -= amount
+                    while user_data[user_id]['Rob-Cooldown'] > 0:
+                        await asyncio.sleep(1)
+                        user_data[user_id]['Rob-Cooldown'] -= 1
+                        user_dump()
                 else:
                     await interaction.response.send_message(f"They were too poor to rob. Completely empty pockets. :pensive:", ephemeral=True)
             else:
                 user_data[user_id]['Crime Score'] += 1
-                bot_dump()
                 if (user_data[user_id]['Crime Score']*10) <= user_data[user_id]['Cash']:
-                    amount = random.randint((bot_data['User Crimes'][user_id]*10), user_data[user_id]['Cash'])
+                    amount = random.randint((user_data[user_id]['Crime Score']*10), user_data[user_id]['Cash'])
                 else:
                     amount = user_data[user_id]['Cash']
                 user_data[rob_id]['Cash'] += amount//2
@@ -868,7 +974,11 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     user_data[user_id]['Bail'] += 50 * user_data[user_id]['Crime Score']
                     await interaction.user.remove_roles(*roles)
                     await interaction.user.add_roles(jail)
-                    await asyncio.sleep(jail_time)
+                    user_data[user_id]['Jail-Time'] = jail_time
+                    while user_data[user_id]['Jail-Time'] > 0:
+                        await asyncio.sleep(1)
+                        user_data[user_id]['Jail-Time'] -= 1
+                        user_dump()
                     updated_user = await interaction.guild.fetch_member(interaction.user.id)
                     if jail in updated_user.roles:
                         await interaction.user.remove_roles(jail)
@@ -918,8 +1028,13 @@ async def jail(interaction: discord.Interaction, action: str):
                 user_data[user_id]['Crime Score'] += 2
                 user_data[user_id]['Bail'] += 50*user_data[user_id]['Crime Score']
                 await interaction.response.send_message(f"Jailbreak failed! {interaction.user.nick} is now in jail.", ephemeral=True)
-                asyncio.sleep(120*user_data[user_id]['Crime Score'])
-                if jail_role not in interaction.user.roles:
+                user_data[user_id]['Jail-Time'] = 120*user_data[user_id]['Crime Score']
+                while user_data[user_id]['Jail-Time'] > 0:
+                    await asyncio.sleep(1)
+                    user_data[user_id]['Jail-Time'] -= 1
+                    user_dump()
+                updated_user = await interaction.guild.fetch_member(interaction.user.id)
+                if jail_role not in updated_user.roles:
                     await interaction.response.send_message(f"Imagine not serving your sentence. Kinda cringe not gonna lie.", ephemeral=True)
                 else:
                     await interaction.user.remove_roles(jail_role)
@@ -972,7 +1087,11 @@ async def jail(interaction: discord.Interaction, action: str):
                 await interaction.user.remove_roles(*role)
                 await interaction.response.send_message(f"You turned yourself in. The police halved your sentence time since you turned yourself in willingly. You need to stay in jail for {jail_time/60} minutes.")
                 user_dump()
-                await asyncio.sleep(jail_time)
+                user_data[user_id]['Jail-Time'] = jail_time
+                while user_data[user_id]['Jail-Time'] > 0:
+                    await asyncio.sleep(1)
+                    user_data[user_id]['Jail-Time'] -= 1
+                    user_dump()
                 await interaction.followup.send(f"Releasing {interaction.user.nick} from jail...")
                 updated_user = await interaction.guild.fetch_member(interaction.user.id)
                 if jail_role in updated_user.roles:
@@ -1111,12 +1230,18 @@ async def hospital(inter: discord.Interaction, action: str):
                         await inter.user.add_roles(hospital_role)
                         await inter.user.remove_roles(*role)
                         user_dump()
-                        await asyncio.sleep(heal_time)
-                        user_data[user_id]['Health'] = 150
-                        await inter.user.add_roles(*role)
-                        await inter.user.remove_roles(hospital_role)
-                        user_data[user_id]['Roles'].clear()
-                        await inter.user.send(f"You are no longer in the hospital.")
+                        user_data[user_id]['Heal-Time'] = heal_time
+                        while user_data[user_id]['Heal-Time'] > 0:
+                            await asyncio.sleep(1)
+                            user_data[user_id]['Heal-Time'] -= 1
+                            user_dump()
+                        updated_user = await inter.guild.fetch_member(inter.user.id)
+                        if hospital_role in updated_user.roles:
+                            user_data[user_id]['Health'] = 150
+                            await inter.user.add_roles(*role)
+                            await inter.user.remove_roles(hospital_role)
+                            user_data[user_id]['Roles'].clear()
+                            await inter.user.send(f"You are no longer in the hospital.")
                 except asyncio.TimeoutError:
                     await inter.followup.send("You didn't answer in time.")
             else:
@@ -1134,6 +1259,24 @@ async def hospital(inter: discord.Interaction, action: str):
             await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
     bot_dump()
     user_dump()
+
+@bot.tree.command(name="blackjack", description="Blackjack")
+async def play_cards(inter: discord.Interaction):
+    user_id = str(inter.user.id)
+    if user_id in user_data:
+        deck = cards.copy()
+        random.shuffle(deck)
+        user_hand = [deck.pop(), deck.pop()]
+        bot_hand = [deck.pop(), deck.pop()]
+        card_value = {"Ace": 11, "King": 10, "Queen": 10, "Jack": 10, "Ten": 10, "Nine": 9, "Eight": 8, "Seven": 7, "Six": 6, "Five": 5, "Four": 4, "Three": 3, "Two": 2}
+        view = CardGame(user_hand, bot_hand, deck, card_value, True)
+        await inter.response.send_message(f"Your hand: {user_hand} (value: {calculate_hand_value(user_hand, card_value)})\nBot's hand: {bot_hand[0]} and a hidden card", view=view)           
+    else:
+        try:
+            await inter.user.kick(reason="Bypassing verification system.")
+            await inter.response.send_message(f"{inter.user.nick.capitalize()} has been kicked for bypassing verification.")
+        except discord.Forbidden:
+            await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
 
 @bot.command(name='shutdown')
 @commands.is_owner()
