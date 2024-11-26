@@ -44,3 +44,4 @@ jobs:
         git add "user_data.json"
         git commit -m "Update JSON data files"
         git push https://$GH_PAT@github.com/Ephyryon/Koko-s-Economy.git main
+      continue-on-error: True
