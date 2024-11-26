@@ -1,9 +1,9 @@
 {
     "751792938433904671": {
-        "Cash": 4105,
+        "Cash": 5605,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 100,
+        "Stamina": 110,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
@@ -11,23 +11,23 @@
                 "car battery": 10,
                 "medkit": 10
             },
-            "burger": 103,
+            "burger": 99,
             "apple": 127
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 17,
+        "Shifts-Worked": 18,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
         "Characters": {
             "Doctor": {
                 "Progress": 0,
-                "Relation": 1
+                "Relation": 2
             },
             "Dave": 0
         },
-        "Job-Cooldown": 0
+        "Job-Cooldown": 3096
     },
     "720629242731429988": {
         "Cash": 720,
