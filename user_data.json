@@ -1,22 +1,25 @@
 {
     "751792938433904671": {
-        "Cash": 5605,
+        "Cash": 6855,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 110,
+        "Stamina": 95,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
                 "shovel": 8,
                 "car battery": 10,
-                "medkit": 10
+                "medkit": 10,
+                "fishing rod": 10
             },
-            "burger": 99,
-            "apple": 127
+            "burger": 96,
+            "apple": 127,
+            "fish": {},
+            "fauna": {}
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 18,
+        "Shifts-Worked": 19,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
@@ -27,7 +30,10 @@
             },
             "Dave": 0
         },
-        "Job-Cooldown": 0
+        "cooldowns": {
+            "Job-Cooldown": 0,
+            "Fish-Cooldown": 0
+        }
     },
     "720629242731429988": {
         "Cash": 720,
@@ -36,7 +42,9 @@
         "Stamina": 70,
         "Job": "Dani The Blackmailer",
         "Inv": {
-            "tools": {}
+            "tools": {},
+            "fish": {},
+            "fauna": {}
         },
         "Key": "cardboard",
         "Key-Fail": 0,
@@ -50,7 +58,8 @@
                 "Relation": 0
             },
             "Dave": 0
-        }
+        },
+        "cooldowns": {}
     },
     "1305521783016783875": {
         "Cash": 100,
@@ -62,7 +71,9 @@
             "tools": {
                 "car battery": 10
             },
-            "burger": 10
+            "burger": 10,
+            "fish": {},
+            "fauna": {}
         },
         "Key": "e",
         "Key-Fail": 0,
@@ -76,7 +87,8 @@
                 "Relation": 0
             },
             "Dave": 0
-        }
+        },
+        "cooldowns": {}
     },
     "1306569822863228959": {
         "Cash": 10,
@@ -85,7 +97,9 @@
         "Stamina": 100,
         "Job": "unemployed",
         "Inv": {
-            "tools": {}
+            "tools": {},
+            "fish": {},
+            "fauna": {}
         },
         "Key": "f",
         "Key-Fail": 0,
@@ -100,10 +114,12 @@
             },
             "Dave": 0
         },
-        "Jail-Time": 0,
-        "Heal-Time": -1,
-        "Job-Cooldown": 0,
-        "Rob-Cooldown": 0
+        "cooldowns": {
+            "Jail-Time": 0,
+            "Heal-Time": -1,
+            "Job-Cooldown": 0,
+            "Rob-Cooldown": 0
+        }
     },
     "656219059322617916": {
         "Cash": 243,
@@ -111,7 +127,9 @@
         "Stamina": 100,
         "Job": "unemployed",
         "Inv": {
-            "tools": {}
+            "tools": {},
+            "fish": {},
+            "fauna": {}
         },
         "Key": "color_key",
         "Key-Fail": 0,
@@ -125,6 +143,7 @@
                 "Relation": 0
             },
             "Dave": 0
-        }
+        },
+        "cooldowns": {}
     }
 }

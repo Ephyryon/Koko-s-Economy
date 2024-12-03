@@ -286,6 +286,7 @@ class CardGame(discord.ui.View):
 async def on_ready():
     clear_channel.start()
     on_health_zero_task.start()
+    user_check.start()
     print(f"Logged in as {bot.user}")
     print(f"GUILD_ID: {guild_id}")
     guild = bot.get_guild(guild_id)
@@ -294,7 +295,7 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s) globally.")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
-    status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members]
+    status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members] + [user_status(member, "Fish-Cooldown") for member in guild.members]
     await asyncio.gather(*status_tasks)
 
 @tasks.loop(minutes=10)
@@ -320,10 +321,10 @@ async def check_health(member):
                 await member.remove_roles(*roles)
                 await member.add_roles(hospital_role)
                 await member.send(f"You have been hospitalized. Time: 50 minutes.")
-                user_data[str(member.id)]['Heal-Time'] = 3000
-                while user_data[str(member.id)]['Heal-Time'] > 0:
+                user_data[str(member.id)]['cooldowns']['Heal-Time'] = 3000
+                while user_data[str(member.id)]['cooldowns']['Heal-Time'] > 0:
                     await asyncio.sleep(1)
-                    user_data[str(member.id)]['Heal-Time'] -= 1
+                    user_data[str(member.id)]['cooldowns']['Heal-Time'] -= 1
                     user_dump()
                 updated_user = await member.guild.fetch_member(member.id)
                 if hospital_role in updated_user.roles:
@@ -346,10 +347,10 @@ async def user_status(member: discord.Member, status):
         role_ids = user_data[str(member.id)]['Roles']
         roles = [member.guild.get_role(role_id) for role_id in role_ids if member.guild.get_role(role_id) is not None]
         if jail_role in member.roles:
-            if status in user_data[str(member.id)]:
-                while user_data[str(member.id)][status] > 0:
+            if status in user_data[str(member.id)]['cooldowns']:
+                while user_data[str(member.id)]['cooldowns'][status] > 0:
                     await asyncio.sleep(1)
-                    user_data[str(member.id)][status] -= 1
+                    user_data[str(member.id)]['cooldowns'][status] -= 1
                     user_dump()
                 updated_user = await member.guild.fetch_member(member.id)
                 if jail_role in updated_user.roles:
@@ -374,12 +375,34 @@ async def user_status(member: discord.Member, status):
                 elif status == "Heal-Time":
                     user_data[str(member.id)]['Health'] = 150
                 user_dump()
+        elif status in user_data[str(member.id)]['cooldowns']:
+            while user_data[str(member.id)]['cooldowns'][status] > 0:
+                await asyncio.sleep(1)
+                user_data[str(member.id)]['cooldowns'][status] -= 1
+                user_dump()
+
+@tasks.loop(minutes=15)
+async def user_check():
+    guild = bot.get_guild(guild_id)
+    user_checks = [user_has(member, "fish", True, True) for member in guild.members] + [user_has(member, "cooldowns", False, True) for member in guild.members] + [user_has(member, "fauna", True, True) for member in guild.members]
+    await asyncio.gather(*user_checks)
+
+async def user_has(member: discord.Member, has, inv: bool, dict: bool):
+    user_id = str(member.id)
+    if user_id in user_data:
+        if inv:
+            if has not in user_data[user_id]['Inv']:
+                if dict:
+                    user_data[user_id]['Inv'][has] = {}
+                else:
+                    user_data[user_id]['Inv'][has] = 0
         else:
-            if status in user_data[str(member.id)]:
-                while user_data[str(member.id)][status] > 0:
-                    await asyncio.sleep(1)
-                    user_data[str(member.id)][status] -= 1
-                    user_dump()
+            if has not in user_data[user_id]:
+                if dict:
+                    user_data[user_id][has] = {}
+                else:
+                    user_data[user_id][has] = 0
+    user_dump()
 
 @bot.event
 async def on_member_join(member):
@@ -402,14 +425,14 @@ async def job_work(interaction: discord.Interaction):
     if user_id in user_data:
         job_name = user_data[user_id]['Job']
         if user_data[user_id]['Stamina'] >= job_data[job_name]['Stam']:
-            if "Job-Cooldown" in user_data[user_id]:
-                if user_data[user_id]['Job-Cooldown'] != 0:
-                    await interaction.response.send_message(f"You need to wait {user_data[user_id]['Job-Cooldown']} seconds to work again.", ephemeral=True)
+            if "Job-Cooldown" in user_data[user_id]['cooldowns']:
+                if user_data[user_id]['cooldowns']['Job-Cooldown'] != 0:
+                    await interaction.response.send_message(f"You can work again <t:{int(time.time())+user_data[user_id]['cooldowns']['Job-Cooldown']}:R>", ephemeral=True)
                     return
                 else:
-                    user_data[user_id]['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
+                    user_data[user_id]['cooldowns']['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
             else:
-                user_data[user_id]['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
+                user_data[user_id]['cooldowns']['Job-Cooldown'] = job_data[job_name]['Work-Cooldown']
             if job_name in job_data:
                 pay = job_data[job_name]['Pay']
                 stam = job_data[job_name]['Stam']
@@ -916,13 +939,13 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
         if rob_id in user_data:
             chance = random.randint(1, 6)
             if "Rob-Cooldown" in user_data[user_id]:
-                if user_data[user_id]['Rob-Cooldown'] > 0:
-                    await interaction.response.send_message(f"You need to wait {user_data[user_id]['Rob-Cooldown']} seconds to use this command again.")
+                if user_data[user_id]['cooldowns']['Rob-Cooldown'] > 0:
+                    await interaction.response.send_message(f"You can rob someone again <t:{int(time.time())+user_data[user_id]['Rob-Cooldown']}:R>")
                     return
                 else:
-                    user_data[user_id]['Rob-Cooldown'] = 600
+                    user_data[user_id]['cooldowns']['Rob-Cooldown'] = 600
             else:
-                user_data[user_id]['Rob-Cooldown'] = 600
+                user_data[user_id]['cooldowns']['Rob-Cooldown'] = 600
             if chance == 1:
                 if user_data[rob_id]['Cash'] > 0:
                     amount = random.randint(1, user_data[rob_id]['Cash'])
@@ -930,9 +953,9 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     user_data[user_id]['Cash'] += amount
                     user_data[rob_id]['Cash'] -= amount
                     await member.send(f"{interaction.user} has robbed you for {amount} cash. You now have {user_data[rob_id]['Cash']} cash left.")
-                    while user_data[user_id]['Rob-Cooldown'] > 0:
+                    while user_data[user_id]['cooldowns']['Rob-Cooldown'] > 0:
                         await asyncio.sleep(1)
-                        user_data[user_id]['Rob-Cooldown'] -= 1
+                        user_data[user_id]['cooldowns']['Rob-Cooldown'] -= 1
                         user_dump()
                 else:
                     await interaction.response.send_message(f"They were too poor to rob. Completely empty pockets. :pensive:", ephemeral=True)
@@ -942,9 +965,9 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     await interaction.response.send_message(f"You robbed {member.nick} for {amount} cash. You were stealthy enough so that {member.nick} didn't find out you robbed them.", ephemeral=True)
                     user_data[user_id]['Cash'] += amount
                     user_data[rob_id]['Cash'] -= amount
-                    while user_data[user_id]['Rob-Cooldown'] > 0:
+                    while user_data[user_id]['cooldowns']['Rob-Cooldown'] > 0:
                         await asyncio.sleep(1)
-                        user_data[user_id]['Rob-Cooldown'] -= 1
+                        user_data[user_id]['cooldowns']['Rob-Cooldown'] -= 1
                         user_dump()
                 else:
                     await interaction.response.send_message(f"They were too poor to rob. Completely empty pockets. :pensive:", ephemeral=True)
@@ -964,7 +987,7 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                 else:
                     await interaction.channel.send(f"{interaction.user.mention} was arrested for attempted theft. They have been fined {amount}. {member.nick} has been given compensation.")
                     await member.send(f"You have been given {amount//2} as compensation for {interaction.user.nick}'s attempted robbery of your cash. Keep your pockets safe.")
-                    await interaction.response.send_message(f"You tried to rob {member.nick}, but you were caught. Have fun in jail I guess. :slight_smile: Jail time: {jail_time/120} minutes.", ephemeral=True)
+                    await interaction.response.send_message(f"You tried to rob {member.nick}, but you were caught. Have fun in jail I guess. :slight_smile: Jail time: <t:{int(time.time())+jail_time}:R>", ephemeral=True)
                     jail = discord.utils.get(member.guild.roles, id=1307363196448931850)
                     roles = interaction.user.roles[1:]
                     role_ids = [role.id for role in roles]
@@ -974,10 +997,10 @@ async def rob(interaction: discord.Interaction, member: discord.Member):
                     user_data[user_id]['Bail'] += 50 * user_data[user_id]['Crime Score']
                     await interaction.user.remove_roles(*roles)
                     await interaction.user.add_roles(jail)
-                    user_data[user_id]['Jail-Time'] = jail_time
-                    while user_data[user_id]['Jail-Time'] > 0:
+                    user_data[user_id]['cooldowns']['Jail-Time'] = jail_time
+                    while user_data[user_id]['cooldowns']['Jail-Time'] > 0:
                         await asyncio.sleep(1)
-                        user_data[user_id]['Jail-Time'] -= 1
+                        user_data[user_id]['cooldowns']['Jail-Time'] -= 1
                         user_dump()
                     updated_user = await interaction.guild.fetch_member(interaction.user.id)
                     if jail in updated_user.roles:
@@ -1027,11 +1050,11 @@ async def jail(interaction: discord.Interaction, action: str):
                 await interaction.user.remove_roles(*roles)
                 user_data[user_id]['Crime Score'] += 2
                 user_data[user_id]['Bail'] += 50*user_data[user_id]['Crime Score']
-                await interaction.response.send_message(f"Jailbreak failed! {interaction.user.nick} is now in jail.", ephemeral=True)
+                await interaction.response.send_message(f"Jailbreak failed! {interaction.user.nick} is now in jail.")
                 user_data[user_id]['Jail-Time'] = 120*user_data[user_id]['Crime Score']
-                while user_data[user_id]['Jail-Time'] > 0:
+                while user_data[user_id]['cooldowns']['Jail-Time'] > 0:
                     await asyncio.sleep(1)
-                    user_data[user_id]['Jail-Time'] -= 1
+                    user_data[user_id]['cooldowns']['Jail-Time'] -= 1
                     user_dump()
                 updated_user = await interaction.guild.fetch_member(interaction.user.id)
                 if jail_role not in updated_user.roles:
@@ -1085,12 +1108,12 @@ async def jail(interaction: discord.Interaction, action: str):
                 user_data[user_id]['Roles'] += role_ids
                 await interaction.user.add_roles(jail_role)
                 await interaction.user.remove_roles(*role)
-                await interaction.response.send_message(f"You turned yourself in. The police halved your sentence time since you turned yourself in willingly. You need to stay in jail for {jail_time/60} minutes.")
+                await interaction.response.send_message(f"You turned yourself in. The police halved your sentence time since you turned yourself in willingly. You need to stay in jail for {jail_time/60} minutes. Released <t:{int(time.time())+jail_time}:R>")
                 user_dump()
-                user_data[user_id]['Jail-Time'] = jail_time
-                while user_data[user_id]['Jail-Time'] > 0:
+                user_data[user_id]['cooldowns']['Jail-Time'] = jail_time
+                while user_data[user_id]['cooldowns']['Jail-Time'] > 0:
                     await asyncio.sleep(1)
-                    user_data[user_id]['Jail-Time'] -= 1
+                    user_data[user_id]['cooldowns']['Jail-Time'] -= 1
                     user_dump()
                 await interaction.followup.send(f"Releasing {interaction.user.nick} from jail...")
                 updated_user = await interaction.guild.fetch_member(interaction.user.id)
@@ -1217,7 +1240,7 @@ async def hospital(inter: discord.Interaction, action: str):
         if action == "H":
             if user_data[user_id]['Health'] < 100:
                 heal_time = (100-user_data[user_id]['Health'])*30
-                await inter.response.send_message(f"You wont be able to use any commands while hospitalized. Are you sure you want to heal yourself? Say 'yes' in this channel if you wish to heal. Heal time: {heal_time}")
+                await inter.response.send_message(f"You wont be able to use any commands while hospitalized. Are you sure you want to heal yourself? Say 'yes' in this channel if you wish to heal. Heal time: <t:{int(time.time())+heal_time}:R>")
                 def check(m):
                     return m.author == inter.user and m.channel == inter.channel
                 try:
@@ -1230,10 +1253,10 @@ async def hospital(inter: discord.Interaction, action: str):
                         await inter.user.add_roles(hospital_role)
                         await inter.user.remove_roles(*role)
                         user_dump()
-                        user_data[user_id]['Heal-Time'] = heal_time
-                        while user_data[user_id]['Heal-Time'] > 0:
+                        user_data[user_id]['cooldowns']['Heal-Time'] = heal_time
+                        while user_data[user_id]['cooldowns']['Heal-Time'] > 0:
                             await asyncio.sleep(1)
-                            user_data[user_id]['Heal-Time'] -= 1
+                            user_data[user_id]['cooldowns']['Heal-Time'] -= 1
                             user_dump()
                         updated_user = await inter.guild.fetch_member(inter.user.id)
                         if hospital_role in updated_user.roles:
@@ -1271,6 +1294,116 @@ async def play_cards(inter: discord.Interaction):
         card_value = {"Ace": 11, "King": 10, "Queen": 10, "Jack": 10, "Ten": 10, "Nine": 9, "Eight": 8, "Seven": 7, "Six": 6, "Five": 5, "Four": 4, "Three": 3, "Two": 2}
         view = CardGame(user_hand, bot_hand, deck, card_value, True)
         await inter.response.send_message(f"Your hand: {user_hand} (value: {calculate_hand_value(user_hand, card_value)})\nBot's hand: {bot_hand[0]} and a hidden card", view=view)           
+    else:
+        try:
+            await inter.user.kick(reason="Bypassing verification system.")
+            await inter.response.send_message(f"{inter.user.nick.capitalize()} has been kicked for bypassing verification.")
+        except discord.Forbidden:
+            await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
+
+@bot.tree.command(name="gather", description="Gather resources and items by using tools.")
+@app_commands.describe(tool="Choose a tool...")
+@app_commands.choices(tool = [
+    app_commands.Choice(name="Fish", value="F"),
+    app_commands.Choice(name="Hunt", value="H"),
+#    app_commands.Choice(name="Search", value="S")
+])
+async def gather(inter: discord.Interaction, tool: str):
+    user_id = str(inter.user.id)
+    if user_id in user_data:
+        if tool == "F":
+            if "fishing rod" in user_data[user_id]['Inv']['tools']:
+                if "Fish-Cooldown" in user_data[user_id]['cooldowns']:
+                    if user_data[user_id]['cooldowns']['Fish-Cooldown'] > 0:
+                        await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Fish-Cooldown']}:R>")
+                        return
+                    else:
+                        user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
+                else:
+                    user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
+                chance = random.randint(1, 2)
+                fish = "fibsh"
+                if chance == 1:
+                    quality = random.randint(1, 10)
+                    if quality == 1:
+                        re_qual = random.randint(1, 10000)
+                        if re_qual == 8654:
+                            user_data[user_id]['Inv']['fish']["fibsh"] += 1
+                        else:
+                            user_data[user_id]['Inv']['fish']["flounder"] += 1
+                            fish = "flounder"
+                    elif quality == 2:
+                        user_data[user_id]['Inv']['fish']["red coat"] += 1
+                        fish = "red coat"
+                    elif quality in [3, 6, 7, 10]:
+                        user_data[user_id]['Inv']['fish']["carp"] += 1
+                        fish = "carp"
+                    elif quality == 4:
+                        user_data[user_id]['Inv']['fish']["flounder"] += 1
+                        fish = "flounder"
+                    elif quality in [5, 8, 9]:
+                        user_data[user_id]['Inv']['fish']["salmon"] += 1
+                        fish = "salmon"
+                    await inter.response.send_message(f"You caught a {fish}!")
+                    if user_data[user_id]['Inv']['tools']['fishing rod'] > 0:
+                        user_data[user_id]['Inv']['tools']['fishing rod'] -= 1
+                    else:
+                        del user_data[user_id]['Inv']['tools']['fishing rod']
+                    user_dump
+                    while user_data[user_id]['cooldowns']['Fish-Cooldown'] > 0:
+                        await asyncio.sleep(1)
+                        user_data[user_id]['cooldowns']['Fish-Cooldown'] -= 1
+                        user_dump
+                else:
+                    await inter.response.send_message("You didn't catch anything...")
+            else:
+                await inter.response.send_message("You don't have a fishing rod.")
+                return
+        elif tool == "H":
+            if "hunting rifle" in user_data[user_id]['Inv']['tools']:
+                if "Hunt-Cooldown" in user_data[user_id]['cooldowns']:
+                    if user_data[user_id]['cooldowns']['Hunt-Cooldown'] > 0:
+                        await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Hunt-Cooldown']}:R>")
+                        return
+                    else:
+                        user_data[user_id]['cooldowns']['Hunt-Cooldown'] = 1800
+                else:
+                    user_data[user_id]['cooldowns']['Hunt-Cooldown'] = 1800
+                chance = random.randint(1, 3)
+                if chance in [1, 2]:
+                    user_data[user_id]['Inv']['fauna']['deer'] += 1
+                    await inter.response.send_message("You caught one deer!")
+                    user_dump()
+                else:
+                    await inter.response.send_message("You didn't find any deers.")
+                    return
+            else:
+                await inter.response.send_message("You don't have a hunting rifle to hunt with.", ephemeral=True)
+                return
+#        elif tool == "S":
+#            if "Search-Cooldown" in user_data[user_id]['cooldowns']:
+#                if user_data[user_id]['cooldowns']['Search-Cooldown'] != 0:
+#                    await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Search-Cooldown']}:R>")
+#                    return
+#                else:
+#                    user_data[user_id]['cooldowns']['Search-Cooldown'] = 1800
+#                    user_dump()
+#            chance = random.randint(1,4)
+#            if chance == 1:
+#                qual = random.randint(1,5)
+#                if qual in [1, 2]:
+#                   item = random.choice("medkit", "hunting rifle")
+#                    user_data[user_id]['Inv']['tools'][item] = 10
+#                elif qual in [3, 4, 5]:
+#                    item = random.choice("car battery", "shovel", "burger", "burger", "burger", "apple", "apple", "apple", "apple", "apple", "apple", "apple")
+#                    if item in ["car battery", "shovel"]:
+#                        user_data[user_id]['Inv']['tools'][item] = 10
+#                    else:
+#                        user_data[user_id]['Inv'][item] += 1
+#            else:
+#                await inter.response.send_message("You found... air!")
+#                user_dump()
+#                return
     else:
         try:
             await inter.user.kick(reason="Bypassing verification system.")

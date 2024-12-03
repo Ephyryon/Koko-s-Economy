@@ -29,6 +29,46 @@
             "dur": 1,
             "Price": 10000,
             "desc": "**A small package with everything you need to heal any wound.**"
+        },
+        "fishing rod": {
+            "dur": 10,
+            "Price": 250,
+            "desc": "**It's a stick with a line and a hook attached to it.**"
+        },
+        "hunting rifle": {
+            "dur": 10,
+            "Price": 500,
+            "desc": "**A simple rifle which fires small iron pellets. It will rip through anything up to 50 meters.**"
+        }
+    },
+    "fish": {
+        "carp": {
+            "Price": 15,
+            "Stamina": 5,
+            "desc": "**A fish.**"
+
+        },
+        "fibsh": {
+            "Price": 2500,
+            "Stamina": 1000,
+            "desc": "**Fibsh.**"
+        },
+        "red coat": {
+            "Price": 100,
+            "Stamina": 25,
+            "desc": "**A very nice fish.**"
+        },
+        "flounder": {
+            "Price": 25,
+            "Stamina": 10,
+            "desc": "**Flat looking ahh fish.**"
+        }
+    },
+    "animal": {
+        "deer": {
+            "Price": 1000,
+            "Stamina": 50,
+            "desc": "**A deer.**"
         }
     }
 }
