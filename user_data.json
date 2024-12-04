@@ -34,7 +34,7 @@
         "cooldowns": {
             "Job-Cooldown": 0,
             "Fish-Cooldown": 0,
-            "Search-Cooldown": 0,
+            "Search-Cooldown": 1800,
             "Hunt-Cooldown": 0
         }
     },
