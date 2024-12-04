@@ -32,7 +32,7 @@
         },
         "cooldowns": {
             "Job-Cooldown": 0,
-            "Fish-Cooldown": 0
+            "Fish-Cooldown": 1800
         }
     },
     "720629242731429988": {
