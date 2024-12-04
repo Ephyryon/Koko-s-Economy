@@ -7,15 +7,17 @@
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
-                "shovel": 8,
+                "shovel": 9,
                 "car battery": 10,
                 "medkit": 10,
-                "fishing rod": 10,
+                "fishing rod": 9,
                 "hunting rifle": 10
             },
-            "burger": 92,
+            "burger": 93,
             "apple": 127,
-            "fish": {},
+            "fish": {
+                "carp": 1
+            },
             "fauna": {}
         },
         "Key": "Sjokolade42!",
@@ -33,9 +35,9 @@
         },
         "cooldowns": {
             "Job-Cooldown": 0,
-            "Fish-Cooldown": 0,
-            "Search-Cooldown": 1800,
-            "Hunt-Cooldown": 0
+            "Fish-Cooldown": 1736,
+            "Search-Cooldown": 1724,
+            "Hunt-Cooldown": 1715
         }
     },
     "720629242731429988": {

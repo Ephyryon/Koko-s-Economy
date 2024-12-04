@@ -1400,11 +1400,14 @@ async def gather(inter: discord.Interaction, tool: str):
                         user_data[user_id]['Inv']['fauna']['deer'] += 1
                     else:
                         user_data[user_id]['Inv']['fauna']['deer'] = 1
-                    await inter.response.send_message("You caught one deer!")
+                    await inter.response.send_message("You caught one deer!", ephemeral=True)
                     user_dump()
                 else:
-                    await inter.response.send_message("You didn't find any deers.")
-                    return
+                    await inter.response.send_message("You didn't find any deer.", ephemeral=True)
+                while user_data[user_id]['cooldowns']['Hunt-Cooldown'] > 0:
+                    user_data[user_id]['cooldowns']['Hunt-Cooldown'] -= 1
+                    await asyncio.sleep(1)
+                    user_dump()
             else:
                 await inter.response.send_message("You don't have a hunting rifle to hunt with.", ephemeral=True)
                 return
@@ -1424,16 +1427,21 @@ async def gather(inter: discord.Interaction, tool: str):
                 if qual in [1, 2]:
                     items = ["medkit", "hunting rifle"]
                     weights = [1, 1]
-                    item = random.choices(items, weights=weights, k=1)
+                    quality = random.choices(items, weights=weights, k=1)
+                    item = quality.pop()
                     user_data[user_id]['Inv']['tools'][item] = 10
                 elif qual in [3, 4, 5]:
                     items = ["car battery", "shovel", "burger", "apple"]
                     weights = [1, 1, 2, 5]
-                    item = random.choices(items, weights=weights, k=1)
+                    quality = random.choices(items, weights=weights, k=1)
+                    item = quality.pop()
                     if item in ["car battery", "shovel"]:
                         user_data[user_id]['Inv']['tools'][item] = 10
-                    else:
+                    elif item in user_data[user_id]['Inv']:
                         user_data[user_id]['Inv'][item] += 1
+                    else:
+                        user_data[user_id]['Inv'][item] = 1
+
                 await inter.response.send_message(f"You found a {item}!")
             else:
                 await inter.response.send_message("You found... air!")
