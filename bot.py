@@ -125,7 +125,13 @@ class MySelect(Select):
         async def hospital_callback(inter: discord.Interaction, selected_member: discord.Member):
             if self.values[0] == "V":
                 await inter.response.send_message(f"You visited {selected_member.nick}.")
-                await selected_member.send(f"{inter.user.nick} visited you while you were in the hospital.")
+                chance = random.randint(1,15)
+                heal_time = user_data[str(selected_member.id)]['cooldowns']['Heal-Time']
+                if chance == 1:
+                    user_data[str(selected_member.id)]['cooldowns']['Heal-Time'] - (heal_time/2)
+                    await selected_member.send(f"{inter.user.nick} visited you. Your spirit increased halving your remaining heal-time.")
+                else:
+                    await selected_member.send(f"{inter.user.nick} visited you while you were in the hospital.")
             elif self.values[0] == "F":
                 if "medkit" in user_data[str(inter.user.id)]['Inv']['tools']:
                     await inter.response.send_message(f"You healed {selected_member.nick} to max health.", ephemeral=True)
@@ -295,7 +301,7 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s) globally.")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
-    status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members] + [user_status(member, "Fish-Cooldown") for member in guild.members]
+    status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members] + [user_status(member, "Fish-Cooldown") for member in guild.members] + [user_status(member, "Search-Cooldown") for member in guild.members] + [user_status(member, "Hunt-Cooldown") for member in guild.members]
     await asyncio.gather(*status_tasks)
 
 @tasks.loop(minutes=10)
@@ -440,9 +446,9 @@ async def job_work(interaction: discord.Interaction):
                 user_data[user_id]['Stamina'] -= stam
                 user_data[user_id]['Shifts-Worked'] += 1
                 await interaction.response.send_message(f'{interaction.user.mention}, you worked as a {job_name} and earned {pay} cash! You now have {user_data[user_id]["Cash"]} cash.')
-                while user_data[user_id]['Job-Cooldown'] > 0:
+                while user_data[user_id]['cooldowns']['Job-Cooldown'] > 0:
                     await asyncio.sleep(1)
-                    user_data[user_id]['Job-Cooldown'] -= 1
+                    user_data[user_id]['cooldowns']['Job-Cooldown'] -= 1
                     user_dump()
                 user_dump()
             else:
@@ -1306,7 +1312,7 @@ async def play_cards(inter: discord.Interaction):
 @app_commands.choices(tool = [
     app_commands.Choice(name="Fish", value="F"),
     app_commands.Choice(name="Hunt", value="H"),
-#    app_commands.Choice(name="Search", value="S")
+    app_commands.Choice(name="Search", value="S")
 ])
 async def gather(inter: discord.Interaction, tool: str):
     user_id = str(inter.user.id)
@@ -1321,6 +1327,7 @@ async def gather(inter: discord.Interaction, tool: str):
                         user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
                 else:
                     user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
+                user_dump()
                 chance = random.randint(1, 2)
                 fish = "fibsh"
                 if chance == 1:
@@ -1328,21 +1335,39 @@ async def gather(inter: discord.Interaction, tool: str):
                     if quality == 1:
                         re_qual = random.randint(1, 10000)
                         if re_qual == 8654:
-                            user_data[user_id]['Inv']['fish']["fibsh"] += 1
+                            if "fibsh" in user_data[user_id]['Inv']['fish']:
+                                user_data[user_id]['Inv']['fish']['fibsh'] += 1
+                            else:
+                                user_data[user_id]['Inv']['fish']['fibsh'] = 1
                         else:
-                            user_data[user_id]['Inv']['fish']["flounder"] += 1
+                            if "flounder" in user_data[user_id]['Inv']['fish']:
+                                user_data[user_id]['Inv']['fish']['flounder'] += 1
+                            else:
+                                user_data[user_id]['Inv']['fish']['flounder'] = 1
                             fish = "flounder"
                     elif quality == 2:
-                        user_data[user_id]['Inv']['fish']["red coat"] += 1
+                        if "red coat" in user_data[user_id]['Inv']['fish']:
+                            user_data[user_id]['Inv']['fish']['red coat'] += 1
+                        else:
+                            user_data[user_id]['Inv']['fish']['red coat'] = 1
                         fish = "red coat"
                     elif quality in [3, 6, 7, 10]:
-                        user_data[user_id]['Inv']['fish']["carp"] += 1
+                        if "carp" in user_data[user_id]['Inv']['fish']:
+                            user_data[user_id]['Inv']['fish']['carp'] += 1
+                        else:
+                            user_data[user_id]['Inv']['fish']['carp'] = 1
                         fish = "carp"
                     elif quality == 4:
-                        user_data[user_id]['Inv']['fish']["flounder"] += 1
+                        if "flounder" in user_data[user_id]['Inv']['fish']:
+                            user_data[user_id]['Inv']['fish']['flounder'] += 1
+                        else:
+                            user_data[user_id]['Inv']['fish']['flounder'] = 1
                         fish = "flounder"
                     elif quality in [5, 8, 9]:
-                        user_data[user_id]['Inv']['fish']["salmon"] += 1
+                        if "salmon" in user_data[user_id]['Inv']['fish']:
+                            user_data[user_id]['Inv']['fish']['salmon'] += 1
+                        else:
+                            user_data[user_id]['Inv']['fish']['salmon'] = 1
                         fish = "salmon"
                     await inter.response.send_message(f"You caught a {fish}!")
                     if user_data[user_id]['Inv']['tools']['fishing rod'] > 0:
@@ -1363,7 +1388,7 @@ async def gather(inter: discord.Interaction, tool: str):
             if "hunting rifle" in user_data[user_id]['Inv']['tools']:
                 if "Hunt-Cooldown" in user_data[user_id]['cooldowns']:
                     if user_data[user_id]['cooldowns']['Hunt-Cooldown'] > 0:
-                        await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Hunt-Cooldown']}:R>")
+                        await inter.response.send_message(f"You can hunt again <t:{int(time.time())+user_data[user_id]['cooldowns']['Hunt-Cooldown']}:R>")
                         return
                     else:
                         user_data[user_id]['cooldowns']['Hunt-Cooldown'] = 1800
@@ -1371,7 +1396,10 @@ async def gather(inter: discord.Interaction, tool: str):
                     user_data[user_id]['cooldowns']['Hunt-Cooldown'] = 1800
                 chance = random.randint(1, 3)
                 if chance in [1, 2]:
-                    user_data[user_id]['Inv']['fauna']['deer'] += 1
+                    if "deer" in user_data[user_id]['Inv']['fauna']:
+                        user_data[user_id]['Inv']['fauna']['deer'] += 1
+                    else:
+                        user_data[user_id]['Inv']['fauna']['deer'] = 1
                     await inter.response.send_message("You caught one deer!")
                     user_dump()
                 else:
@@ -1380,30 +1408,40 @@ async def gather(inter: discord.Interaction, tool: str):
             else:
                 await inter.response.send_message("You don't have a hunting rifle to hunt with.", ephemeral=True)
                 return
-#        elif tool == "S":
-#            if "Search-Cooldown" in user_data[user_id]['cooldowns']:
-#                if user_data[user_id]['cooldowns']['Search-Cooldown'] != 0:
-#                    await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Search-Cooldown']}:R>")
-#                    return
-#                else:
-#                    user_data[user_id]['cooldowns']['Search-Cooldown'] = 1800
-#                    user_dump()
-#            chance = random.randint(1,4)
-#            if chance == 1:
-#                qual = random.randint(1,5)
-#                if qual in [1, 2]:
-#                   item = random.choice("medkit", "hunting rifle")
-#                    user_data[user_id]['Inv']['tools'][item] = 10
-#                elif qual in [3, 4, 5]:
-#                    item = random.choice("car battery", "shovel", "burger", "burger", "burger", "apple", "apple", "apple", "apple", "apple", "apple", "apple")
-#                    if item in ["car battery", "shovel"]:
-#                        user_data[user_id]['Inv']['tools'][item] = 10
-#                    else:
-#                        user_data[user_id]['Inv'][item] += 1
-#            else:
-#                await inter.response.send_message("You found... air!")
-#                user_dump()
-#                return
+        elif tool == "S":
+            if "Search-Cooldown" in user_data[user_id]['cooldowns']:
+                if user_data[user_id]['cooldowns']['Search-Cooldown'] > 0:
+                    await inter.response.send_message(f"You can search again <t:{int(time.time())+user_data[user_id]['cooldowns']['Search-Cooldown']}:R>")
+                    return
+                else:
+                    user_data[user_id]['cooldowns']['Search-Cooldown'] = 1800
+            else:
+                user_data[user_id]['cooldowns']['Search-Cooldown'] = 1800
+            user_dump()
+            chance = random.randint(1,4)
+            if chance in [1, 2, 3, 4]:
+                qual = random.randint(1,5)
+                if qual in [1, 2]:
+                    items = ["medkit", "hunting rifle"]
+                    weights = [1, 1]
+                    item = random.choices(items, weights=weights, k=1)
+                    user_data[user_id]['Inv']['tools'][item] = 10
+                elif qual in [3, 4, 5]:
+                    items = ["car battery", "shovel", "burger", "apple"]
+                    weights = [1, 1, 2, 5]
+                    item = random.choices(items, weights=weights, k=1)
+                    if item in ["car battery", "shovel"]:
+                        user_data[user_id]['Inv']['tools'][item] = 10
+                    else:
+                        user_data[user_id]['Inv'][item] += 1
+                await inter.response.send_message(f"You found a {item}!")
+            else:
+                await inter.response.send_message("You found... air!")
+                user_dump()
+            while user_data[user_id]['cooldowns']['Search-Cooldown'] > 0:
+                await asyncio.sleep(1)
+                user_data[user_id]['cooldowns']['Search-Cooldown'] -= 1
+                user_dump()
     else:
         try:
             await inter.user.kick(reason="Bypassing verification system.")

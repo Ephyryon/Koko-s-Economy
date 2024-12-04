@@ -1,25 +1,26 @@
 {
     "751792938433904671": {
-        "Cash": 6855,
+        "Cash": 7855,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 95,
+        "Stamina": 105,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
                 "shovel": 8,
                 "car battery": 10,
                 "medkit": 10,
-                "fishing rod": 10
+                "fishing rod": 10,
+                "hunting rifle": 10
             },
-            "burger": 96,
+            "burger": 92,
             "apple": 127,
             "fish": {},
             "fauna": {}
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 19,
+        "Shifts-Worked": 20,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
@@ -32,7 +33,9 @@
         },
         "cooldowns": {
             "Job-Cooldown": 0,
-            "Fish-Cooldown": 1800
+            "Fish-Cooldown": 0,
+            "Search-Cooldown": 0,
+            "Hunt-Cooldown": 0
         }
     },
     "720629242731429988": {
