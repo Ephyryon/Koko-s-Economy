@@ -35,9 +35,9 @@
         },
         "cooldowns": {
             "Job-Cooldown": 0,
-            "Fish-Cooldown": 1736,
-            "Search-Cooldown": 1724,
-            "Hunt-Cooldown": 1715
+            "Fish-Cooldown": 0,
+            "Search-Cooldown": 0,
+            "Hunt-Cooldown": 0
         }
     },
     "720629242731429988": {
