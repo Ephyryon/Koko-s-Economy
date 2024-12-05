@@ -1457,6 +1457,35 @@ async def gather(inter: discord.Interaction, tool: str):
         except discord.Forbidden:
             await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
 
+@bot.tree.command(name="coinflip", description="Flip a coin. Casual=No bet, Competetive=Bet")
+@app_commands.describe(action="...")
+@app_commands.choices(action = [
+    app_commands.Choice(name="Competetive", value="Co"),
+    app_commands.Choice(name="Casual", value="C")
+])
+async def coinflip(inter: discord.Interaction, action: str, bet_on: str = "", bet: int = 0):
+    user_id = str(inter.user.id)
+    pos = ["Heads", "Tails"]
+    result = pos.pop()
+    if user_id in user_data:
+        if action == "Co":
+            if result == bet_on:
+                await inter.response.send_message(f"{result}. You win!")
+                user_data[user_id]['Cash'] += bet*2
+                user_dump()
+            else:
+                await inter.response.send_message(f"{result}. You lost.")
+                user_data[user_id]['Cash'] -= bet
+                user_dump()
+        elif action == "C":
+            await inter.response.send_message(f"{result}.")
+    else:
+        try:
+            await inter.user.kick(reason="Bypassing verification system.")
+            await inter.response.send_message(f"{inter.user.nick.capitalize()} has been kicked for bypassing verification.")
+        except discord.Forbidden:
+            await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
+
 @bot.command(name='shutdown')
 @commands.is_owner()
 async def shutdown(ctx):
