@@ -34,9 +34,9 @@
             "Dave": 0
         },
         "cooldowns": {
-            "Job-Cooldown": 3097,
-            "Fish-Cooldown": 1418,
-            "Search-Cooldown": 1227,
+            "Job-Cooldown": 2763,
+            "Fish-Cooldown": 1084,
+            "Search-Cooldown": 893,
             "Hunt-Cooldown": 0
         }
     },
@@ -49,9 +49,6 @@
         "Inv": {
             "tools": {
                 "fishing rod": 9
-            },
-            "fish": {
-                "flounder": 1
             },
             "fauna": {}
         },
@@ -84,7 +81,6 @@
                 "car battery": 10
             },
             "burger": 10,
-            "fish": {},
             "fauna": {}
         },
         "Key": "e",
@@ -110,7 +106,6 @@
         "Job": "unemployed",
         "Inv": {
             "tools": {},
-            "fish": {},
             "fauna": {}
         },
         "Key": "f",
@@ -140,7 +135,6 @@
         "Job": "unemployed",
         "Inv": {
             "tools": {},
-            "fish": {},
             "fauna": {}
         },
         "Key": "color_key",
