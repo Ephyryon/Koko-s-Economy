@@ -34,16 +34,16 @@
             "Dave": 0
         },
         "cooldowns": {
-            "Job-Cooldown": 2763,
-            "Fish-Cooldown": 1084,
-            "Search-Cooldown": 893,
+            "Job-Cooldown": 0,
+            "Fish-Cooldown": 0,
+            "Search-Cooldown": 0,
             "Hunt-Cooldown": 0
         }
     },
     "720629242731429988": {
         "Cash": 620,
         "Bank": 0,
-        "Health": 100,
+        "Health": 48,
         "Stamina": 40,
         "Job": "Dani The Blackmailer",
         "Inv": {
@@ -56,7 +56,7 @@
         "Key-Fail": 0,
         "Shifts-Worked": 13,
         "Roles": [],
-        "Crime Score": 9,
+        "Crime Score": 13,
         "Bail": 0,
         "NPC": {
             "Doctor": {
@@ -130,7 +130,7 @@
     },
     "656219059322617916": {
         "Cash": 243,
-        "Health": 95,
+        "Health": 87,
         "Stamina": 100,
         "Job": "unemployed",
         "Inv": {
