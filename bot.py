@@ -469,22 +469,18 @@ async def user_status(member: discord.Member, status):
 @tasks.loop(minutes=15)
 async def user_check():
     guild = bot.get_guild(guild_id)
-    user_checks = [user_has(member, "fish", True, True) for member in guild.members] + [user_has(member, "cooldowns", False, True) for member in guild.members] + [user_has(member, "fauna", True, True) for member in guild.members]
+    user_checks = [user_has(member, "cooldowns", False, True) for member in guild.members] + [user_has(member, "fauna", True, True) for member in guild.members]
     await asyncio.gather(*user_checks)
 
 async def user_has(member: discord.Member, has, inv: bool, dict: bool):
     user_id = str(member.id)
     if user_id in user_data:
         if inv:
-            if has != "fish":
-                if has not in user_data[user_id]['Inv']:
-                    if dict:
-                        user_data[user_id]['Inv'][has] = {}
-                    else:
-                        user_data[user_id]['Inv'][has] = 0
-            else:
-                user_data[user_id]['Inv'][has].clear()
-                del user_data[user_id]['Inv'][has]
+            if has not in user_data[user_id]['Inv']:
+                if dict:
+                    user_data[user_id]['Inv'][has] = {}
+                else:
+                    user_data[user_id]['Inv'][has] = 0
         else:
             if has not in user_data[user_id]:
                 if dict:
