@@ -111,6 +111,85 @@ class MemberView(discord.ui.View):
         super().__init__()
         self.add_item(MemberSelect(members, callback))
 
+class SubLocationSelect(Select):
+    def __init__(self, loc, nam, val, desc):
+        if loc == "S":
+            print("Hi")
+        elif loc == "Po":
+            print("Hi")
+        elif loc == "C":
+            print("Hi")
+        elif loc == "A":
+            print("Hi")
+        elif loc == "H":
+            print("Hi")
+        elif loc == "O":
+            print("Hi")
+        elif loc == "P":
+            print("Hi")
+        elif loc == "L":
+            print("Hi")
+        elif loc == "D":
+            print("Hi")
+        options = [discord.SelectOption(label=nam, value=val, description=desc)]
+
+class LocationSelect(Select):
+    def __init__(self, loc):
+        if loc == "T":
+            name1 = "Super Market"
+            desc1 = ""
+            loc1 = "S"
+            name2 = "Alley"
+            desc2 = ""
+            loc2 = "A"
+            name3 = "Park"
+            desc3 = ""
+            loc3 = "P"
+        elif loc == "F":
+            name1 = "Pond"
+            desc1 = ""
+            loc1 = "Po"
+            name2 = "Hut"
+            desc2 = ""
+            loc2 = "H"
+            name3 = "Lumber Yard"
+            desc3 = ""
+            loc3 = "L"
+        elif loc == "K":
+            name1 = "Cafeteria"
+            desc1 = ""
+            loc1 = "C"
+            name2 = "Offices"
+            desc2 = ""
+            loc2 = "O"
+            name3 = "Data Room"
+            desc3 = ""
+            loc3 = "D"
+        options = [discord.SelectOption(label=name1, value=loc1, description=desc1),
+                   discord.SelectOption(label=name2, value=loc2, description=desc2),
+                   discord.SelectOption(label=name3, value=loc3, description=desc3)]
+        super().__init__(placeholder="Where do you go?", min_values=1, max_values=1, options=options)
+    
+    async def sub_loc(self, inter: discord.Interaction):
+        if self.values[0] == "S":
+            print("Hi")
+        elif self.values[0] == "Po":
+            print("Hi")
+        elif self.values[0] == "C":
+            print("Hi")
+        elif self.values[0] == "A":
+            print("Hi")
+        elif self.values[0] == "H":
+            print("Hi")
+        elif self.values[0] == "O":
+            print("Hi")
+        elif self.values[0] == "P":
+            print("Hi")
+        elif self.values[0] == "L":
+            print("Hi")
+        elif self.values[0] == "D":
+            print("Hi")
+
 class MySelect(Select):
     def __init__(self):
         options = [
@@ -390,7 +469,7 @@ async def user_status(member: discord.Member, status):
 @tasks.loop(minutes=15)
 async def user_check():
     guild = bot.get_guild(guild_id)
-    user_checks = [user_has(member, "fish", True, True) for member in guild.members] + [user_has(member, "cooldowns", False, True) for member in guild.members] + [user_has(member, "fauna", True, True) for member in guild.members]
+    user_checks = [user_has(member, "cooldowns", False, True) for member in guild.members] + [user_has(member, "fauna", True, True) for member in guild.members]
     await asyncio.gather(*user_checks)
 
 async def user_has(member: discord.Member, has, inv: bool, dict: bool):
@@ -477,21 +556,30 @@ async def stats(interaction: discord.Interaction):
 
 @bot.tree.command(name="shop_view", description="View items in shop.")
 async def shop_view(interaction: discord.Interaction):
-    shop_message = "Items available in the shop:\n"
+    shop_message = "**Items available in the shop:**\n"
+    commons = []
+    tools = []
     for item, attributes in item_data.items():
         try:
+
             price = attributes["Price"]
             stamina = attributes["Stamina"]
-            shop_message += f"{item.capitalize()}: {{Stamina: {stamina}, Price: {price}}}\n"
+            commons.append(f"{item.capitalize()}: {{Stamina: {stamina}, Price: {price}}}")
         except KeyError:
-            for item, attributes in item_data['tools'].items():
-                try:
-                    dur = attributes["dur"]
-                    price = attributes["Price"]
-                    shop_message += f"{item.capitalize()}: {{Durability: {dur}, Price: {price}}}\n"
-                except KeyError:
-                    None
-    
+            pass
+    for item, attributes in item_data['tools'].items():
+        try:
+            dur = attributes["dur"]
+            price = attributes["Price"]
+            tools.append(f"{item.capitalize()}: {{Durability: {dur}, Price: {price}}}")
+        except KeyError:
+            pass
+    if commons:
+        commons = "\n".join(commons)
+        shop_message += f"```Commons:\n{commons}```"
+    if tools:
+        tools = "\n".join(tools)
+        shop_message += f"```Tools:\n{tools}```"
     await interaction.response.send_message(shop_message)
 
 @bot.tree.command(name="shop_buy", description="Buy an item available in the shop. Write max to buy as many as you can.")
@@ -749,29 +837,38 @@ async def inventory(interaction: discord.Interaction):
     if user_id in user_data:
         inv_items = []
         tools_items = []
+        fauna_items = []
         for item, quantity in user_data[user_id]['Inv'].items():
-            if item != "tools":
-                for thing, words in item_data.items():
-                    if thing in user_data[user_id]['Inv']:
-                        if thing != "tools":
-                            if item == thing:
-                                inv_items.append(f"{item.capitalize()}: {quantity}, Stamina gain: {words['Stamina']}, Value: {words['Price']//2}\nDescription: {words['desc']}")
-            else:
+            if item == "tools":
                 for name, amount in user_data[user_id]['Inv']['tools'].items():
                     for title, desc in item_data['tools'].items():
-                        if title in user_data[user_id]['Inv']['tools']:
-                            if name == title:
-                                tools_items.append(f"{name.capitalize()}: {amount}, Value: {desc['Price']//2}, Description: {desc['desc']}")
+                        if name == title:
+                            tools_items.append(f"{name.capitalize()}: {amount}, Value: {desc['Price']//2}\nDescription: {desc['desc']}")
+            elif item == "fauna":
+                for name, amount in user_data[user_id]['Inv']['fauna'].items():
+                    for title, desc in item_data['fauna'].items():
+                        if name == title:
+                            fauna_items.append(f"{name.capitalize()}: {amount}, Stamina gain: {desc['Stamina']}, Value: {desc['Price']//2}\nDescription: {desc['desc']}")
+            else:
+                for thing, words in item_data.items():
+                    if item == thing:
+                        if thing != "tools":
+                            if thing != "fauna":
+                                inv_items.append(f"{item.capitalize()}: {quantity}, Stamina gain: {words['Stamina']}, Value: {words['Price']//2}\nDescription: {words['desc']}")
         
-        if inv_items or tools_items:
-            item_list = "\n".join(inv_items)
-            tools_list = "\n".join(tools_items)
+        if inv_items or tools_items or fauna_items:
             response_message = "**Inventory:\n**"
-            if item_list:
+            if inv_items:
+                item_list = "\n".join(inv_items)
                 response_message += f"```\nCommon items:\n{item_list}```"
-            if tools_list:
+            if tools_items:
+                tools_list = "\n".join(tools_items)
                 response_message += f"```\nTools:\n{tools_list}```"
-            await interaction.response.send_message(response_message)
+            if fauna_items:
+                fauna_list = "\n".join(fauna_items)
+                print(fauna_list)
+                response_message += f"```\nFauna:\n{fauna_list}```"
+            await interaction.response.send_message(response_message, ephemeral=True)
         else:
             await interaction.response.send_message("You don't have any items in your inventory.", ephemeral=True)
     else:
@@ -1319,56 +1416,25 @@ async def gather(inter: discord.Interaction, tool: str):
     if user_id in user_data:
         if tool == "F":
             if "fishing rod" in user_data[user_id]['Inv']['tools']:
-                if "Fish-Cooldown" in user_data[user_id]['cooldowns']:
-                    if user_data[user_id]['cooldowns']['Fish-Cooldown'] > 0:
-                        await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Fish-Cooldown']}:R>")
-                        return
-                    else:
-                        user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
-                else:
-                    user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
+#                if "Fish-Cooldown" in user_data[user_id]['cooldowns']:
+#                    if user_data[user_id]['cooldowns']['Fish-Cooldown'] > 0:
+#                        await inter.response.send_message(f"You can fish again <t:{int(time.time())+user_data[user_id]['cooldowns']['Fish-Cooldown']}:R>")
+#                        return
+#                    else:
+#                        user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
+#                else:
+#                    user_data[user_id]['cooldowns']['Fish-Cooldown'] = 1800
                 user_dump()
                 chance = random.randint(1, 2)
-                fish = "fibsh"
+                fish_list = ["fibsh", "carp", "red coat", "salmon", "flounder"]
+                weight = [1, 20, 10, 20, 5]
                 if chance == 1:
                     quality = random.randint(1, 10)
-                    if quality == 1:
-                        re_qual = random.randint(1, 10000)
-                        if re_qual == 8654:
-                            if "fibsh" in user_data[user_id]['Inv']['fish']:
-                                user_data[user_id]['Inv']['fish']['fibsh'] += 1
-                            else:
-                                user_data[user_id]['Inv']['fish']['fibsh'] = 1
-                        else:
-                            if "flounder" in user_data[user_id]['Inv']['fish']:
-                                user_data[user_id]['Inv']['fish']['flounder'] += 1
-                            else:
-                                user_data[user_id]['Inv']['fish']['flounder'] = 1
-                            fish = "flounder"
-                    elif quality == 2:
-                        if "red coat" in user_data[user_id]['Inv']['fish']:
-                            user_data[user_id]['Inv']['fish']['red coat'] += 1
-                        else:
-                            user_data[user_id]['Inv']['fish']['red coat'] = 1
-                        fish = "red coat"
-                    elif quality in [3, 6, 7, 10]:
-                        if "carp" in user_data[user_id]['Inv']['fish']:
-                            user_data[user_id]['Inv']['fish']['carp'] += 1
-                        else:
-                            user_data[user_id]['Inv']['fish']['carp'] = 1
-                        fish = "carp"
-                    elif quality == 4:
-                        if "flounder" in user_data[user_id]['Inv']['fish']:
-                            user_data[user_id]['Inv']['fish']['flounder'] += 1
-                        else:
-                            user_data[user_id]['Inv']['fish']['flounder'] = 1
-                        fish = "flounder"
-                    elif quality in [5, 8, 9]:
-                        if "salmon" in user_data[user_id]['Inv']['fish']:
-                            user_data[user_id]['Inv']['fish']['salmon'] += 1
-                        else:
-                            user_data[user_id]['Inv']['fish']['salmon'] = 1
-                        fish = "salmon"
+                    fish = random.choices(fish_list, weights=weight, k=1)[0]
+                    if fish in user_data[user_id]['Inv']['fauna']:
+                        user_data[user_id]['Inv']['fauna'][fish] += 1
+                    else:
+                        user_data[user_id]['Inv']['fauna'][fish] = 1
                     await inter.response.send_message(f"You caught a {fish}!")
                     if user_data[user_id]['Inv']['tools']['fishing rod'] > 0:
                         user_data[user_id]['Inv']['tools']['fishing rod'] -= 1
@@ -1471,7 +1537,7 @@ async def coinflip(inter: discord.Interaction, action: str, bet_on: str = "", be
         if action == "Co":
             if result == bet_on:
                 await inter.response.send_message(f"{result}. You win!")
-                user_data[user_id]['Cash'] += bet*2
+                user_data[user_id]['Cash'] += bet
                 user_dump()
             else:
                 await inter.response.send_message(f"{result}. You lost.")
@@ -1485,6 +1551,30 @@ async def coinflip(inter: discord.Interaction, action: str, bet_on: str = "", be
             await inter.response.send_message(f"{inter.user.nick.capitalize()} has been kicked for bypassing verification.")
         except discord.Forbidden:
             await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
+
+@bot.tree.command(name="locations", description="Travel around.")
+@app_commands.describe(loc="...")
+@app_commands.choices(loc = [
+    app_commands.Choice(name="Town", value="T"),
+    app_commands.Choice(name="Forest", value="F"),
+    app_commands.Choice(name="Koko Economy Central", value="K")
+])
+async def locations(inter: discord.Interaction, loc: str):
+    user_id = str(inter.user.id)
+    if user_id in user_data:
+        if loc == "T":
+            print("Hi")
+        elif loc == "F":
+            print("Hi")
+        elif loc == "K":
+            print("Hi")
+    else:
+        try:
+            await inter.user.kick(reason="Bypassing verification system.")
+            await inter.response.send_message(f"{inter.user.nick.capitalize()} has been kicked for bypassing verification.")
+        except discord.Forbidden:
+            await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
+
 
 @bot.command(name='shutdown')
 @commands.is_owner()

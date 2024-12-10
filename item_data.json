@@ -41,7 +41,12 @@
             "desc": "**A simple rifle which fires small iron pellets. It will rip through anything up to 50 meters.**"
         }
     },
-    "fish": {
+    "fauna": {
+        "deer": {
+            "Price": 1000,
+            "Stamina": 50,
+            "desc": "**A deer.**"
+        },
         "carp": {
             "Price": 15,
             "Stamina": 5,
@@ -62,13 +67,11 @@
             "Price": 25,
             "Stamina": 10,
             "desc": "**Flat looking ahh fish.**"
-        }
-    },
-    "animal": {
-        "deer": {
-            "Price": 1000,
-            "Stamina": 50,
-            "desc": "**A deer.**"
+        },
+        "salmon": {
+            "Price": 20,
+            "Stamina": 7,
+            "desc": "**A basic fish found in most waters.**"
         }
     }
 }
