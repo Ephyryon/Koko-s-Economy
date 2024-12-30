@@ -3,7 +3,7 @@
         "Cash": 9355,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 15,
+        "Stamina": 95,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
@@ -18,7 +18,7 @@
                 "red coat": 20
             },
             "burger": 93,
-            "apple": 127
+            "apple": 119
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
