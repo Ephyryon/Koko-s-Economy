@@ -2071,7 +2071,7 @@ async def locations(inter: discord.Interaction, loc: str):
             await inter.response.send_message(f"CommandError: user not in registry: user not verified; KickFail: PermissionError: {inter.user.nick.capitalize()} is admin;")
 
 
-@bot.command(name='shutdown!')
+@bot.command(name='shutdown')
 @commands.has_any_role('Koko The Economist', 'Tax Advisors')
 async def shutdown(ctx):
     await ctx.send("Shutting down...")
