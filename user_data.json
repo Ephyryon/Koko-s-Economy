@@ -68,7 +68,8 @@
         "cooldowns": {
             "Job-Cooldown": 0,
             "Fish-Cooldown": 0
-        }
+        },
+        "Characters": {}
     },
     "1305521783016783875": {
         "Cash": 100,
@@ -96,7 +97,8 @@
             },
             "Dave": 0
         },
-        "cooldowns": {}
+        "cooldowns": {},
+        "Characters": {}
     },
     "1306569822863228959": {
         "Cash": 10,
@@ -126,7 +128,8 @@
             "Heal-Time": -1,
             "Job-Cooldown": 0,
             "Rob-Cooldown": 0
-        }
+        },
+        "Characters": {}
     },
     "656219059322617916": {
         "Cash": 243,
@@ -150,6 +153,7 @@
             },
             "Dave": 0
         },
-        "cooldowns": {}
+        "cooldowns": {},
+        "Characters": {}
     }
 }
