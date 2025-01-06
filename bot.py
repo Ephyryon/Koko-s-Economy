@@ -874,6 +874,10 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s) globally.")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
+    channel = bot.get_channel(1318187395807707147)
+    if channel:
+        await channel.purge()
+        await channel.send('> # Bot Status: **Active**')
     status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members] + [user_status(member, "Fish-Cooldown") for member in guild.members] + [user_status(member, "Search-Cooldown") for member in guild.members] + [user_status(member, "Hunt-Cooldown") for member in guild.members] + [user_status(member, "Ronald") for member in guild.members] + [user_status(member, "Doctor") for member in guild.members] + [user_status(member, "Dina") for member in guild.members] + [user_status(member, "Ronald-Ques") for member in guild.members]
     await asyncio.gather(*status_tasks)
 
@@ -2076,6 +2080,10 @@ async def locations(inter: discord.Interaction, loc: str):
 async def shutdown(ctx):
     await ctx.send("Shutting down...")
     print("Shutting down...")
+    channel = bot.get_channel(1318187395807707147)
+    if channel:
+        await channel.purge()
+        await channel.send('> # Bot Status: **Inactive**')
     await bot.close()
 
 bot.run(token)
