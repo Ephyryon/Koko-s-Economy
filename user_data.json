@@ -1,9 +1,9 @@
 {
     "751792938433904671": {
-        "Cash": 9355,
+        "Cash": 10855,
         "Bank": 979,
         "Health": 100,
-        "Stamina": 95,
+        "Stamina": 105,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
@@ -17,12 +17,12 @@
                 "carp": 1,
                 "red coat": 20
             },
-            "burger": 93,
+            "burger": 89,
             "apple": 119
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 21,
+        "Shifts-Worked": 22,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
@@ -34,7 +34,7 @@
             "Dave": 0
         },
         "cooldowns": {
-            "Job-Cooldown": 0,
+            "Job-Cooldown": 1659,
             "Fish-Cooldown": 0,
             "Search-Cooldown": 0,
             "Hunt-Cooldown": 0
