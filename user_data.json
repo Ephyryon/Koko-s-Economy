@@ -1,9 +1,9 @@
 {
     "751792938433904671": {
-        "Cash": 10855,
-        "Bank": 979,
+        "Cash": 0,
+        "Bank": 13334,
         "Health": 100,
-        "Stamina": 105,
+        "Stamina": 15,
         "Job": "Koko The Economist",
         "Inv": {
             "tools": {
@@ -22,7 +22,7 @@
         },
         "Key": "Sjokolade42!",
         "Key-Fail": 0,
-        "Shifts-Worked": 22,
+        "Shifts-Worked": 23,
         "Roles": [],
         "Crime Score": 0,
         "Bail": 0,
