@@ -878,6 +878,13 @@ async def on_ready():
     if channel:
         await channel.purge()
         await channel.send('> # Bot Status: **Active**')
+    timeout_time = 329*60
+    if timeout_time > 0:
+        timeout_time -= 1
+        await asyncio.sleep(1)
+    else:
+        await channel.purge()
+        await channel.send('> # Bot Status: **Inactive**')
     status_tasks = [user_status(member, "Jail-Time") for member in guild.members] + [user_status(member, "Heal-Time") for member in guild.members] + [user_status(member, "Job-Cooldown") for member in guild.members] + [user_status(member, "Rob-Cooldown") for member in guild.members] + [user_status(member, "Fish-Cooldown") for member in guild.members] + [user_status(member, "Search-Cooldown") for member in guild.members] + [user_status(member, "Hunt-Cooldown") for member in guild.members] + [user_status(member, "Ronald") for member in guild.members] + [user_status(member, "Doctor") for member in guild.members] + [user_status(member, "Dina") for member in guild.members] + [user_status(member, "Ronald-Ques") for member in guild.members]
     await asyncio.gather(*status_tasks)
 
