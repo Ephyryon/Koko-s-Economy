@@ -21,44 +21,44 @@ intents.presences = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Load user data from a JSON file
-if os.path.exists('Data\user_data.json'):
-    with open('Data\user_data.json', 'r') as f:
+if os.path.exists('Data/user_data.json'):
+    with open('Data/Data/user_data.json', 'r') as f:
         user_data = json.load(f)
 else:
     user_data = {}
 
 def user_dump():
-    with open('Data\user_data.json', 'w') as file:
+    with open('Data/Data/user_data.json', 'w') as file:
         json.dump(user_data, file, indent=4)
 
-if os.path.exists('Data\item_data.json'):
-    with open('Data\item_data.json', 'r') as e:
+if os.path.exists('Data/Data/item_data.json'):
+    with open('Data/Data/item_data.json', 'r') as e:
         item_data = json.load(e)
 else:
     item_data = {}
 
 def item_dump():
-    with open('Data\item_data.json', 'w') as file:
+    with open('Data/item_data.json', 'w') as file:
         json.dump(item_data, file, indent=4)
 
 if os.path.exists('Data\job_data.json'):
-    with open('Data\job_data.json', 'r') as t:
+    with open('Data/job_data.json', 'r') as t:
         job_data = json.load(t)
 else:
     job_data = {}
 
 def job_dump():
-    with open('Data\job_data.json', 'w') as file:
+    with open('Data/job_data.json', 'w') as file:
         json.dump(job_data, file, indent=4)
 
-if os.path.exists(r'Data\bot_data.json'):
-    with open(r'Data\bot_data.json', 'r') as q:
+if os.path.exists('Data/bot_data.json'):
+    with open('Data/bot_data.json', 'r') as q:
         bot_data = json.load(q)
 else:
     bot_data = {}
 
 def bot_dump():
-    with open(r'Data\bot_data.json', 'w') as file:
+    with open('Data/bot_data.json', 'w') as file:
         json.dump(bot_data, file, indent=4)
 
 cooldowns = {}
