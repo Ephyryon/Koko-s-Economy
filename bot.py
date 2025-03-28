@@ -22,17 +22,17 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Load user data from a JSON file
 if os.path.exists('Data/user_data.json'):
-    with open('Data/Data/user_data.json', 'r') as f:
+    with open('Data/user_data.json', 'r') as f:
         user_data = json.load(f)
 else:
     user_data = {}
 
 def user_dump():
-    with open('Data/Data/user_data.json', 'w') as file:
+    with open('Data/user_data.json', 'w') as file:
         json.dump(user_data, file, indent=4)
 
-if os.path.exists('Data/Data/item_data.json'):
-    with open('Data/Data/item_data.json', 'r') as e:
+if os.path.exists('Data/item_data.json'):
+    with open('Data/item_data.json', 'r') as e:
         item_data = json.load(e)
 else:
     item_data = {}
@@ -41,7 +41,7 @@ def item_dump():
     with open('Data/item_data.json', 'w') as file:
         json.dump(item_data, file, indent=4)
 
-if os.path.exists('Data\job_data.json'):
+if os.path.exists('Data/job_data.json'):
     with open('Data/job_data.json', 'r') as t:
         job_data = json.load(t)
 else:
